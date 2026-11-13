@@ -9,11 +9,12 @@ workflows:
     scripts:
       - name: Install CocoaPods dependencies
         script: |
-          cd src
+          cd $CM_BUILD_DIR/src
           pod install
       - name: Build unsigned IPA
         script: |
-          cd src
+          cd $CM_BUILD_DIR/src
+          
           xcodebuild archive \
             -workspace "Fragmently.xcworkspace" \
             -scheme "Fragmently" \
@@ -23,8 +24,9 @@ workflows:
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO
-          mkdir -p build/Payload
-          cp -r $CM_BUILD_DIR/build/App.xcarchive/Products/Applications/*.app build/Payload/
-          cd build && zip -r App-unsigned.ipa Payload
+            
+          mkdir -p $CM_BUILD_DIR/build/Payload
+          cp -r $CM_BUILD_DIR/build/App.xcarchive/Products/Applications/*.app $CM_BUILD_DIR/build/Payload/
+          cd $CM_BUILD_DIR/build && zip -r App-unsigned.ipa Payload
     artifacts:
       - build/App-unsigned.ipa
