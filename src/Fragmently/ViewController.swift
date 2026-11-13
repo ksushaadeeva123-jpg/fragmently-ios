@@ -13,7 +13,6 @@ class ViewController: UIViewController, WKNavigationDelegate, UIDocumentInteract
     }
     
     @IBOutlet weak var loadingView: UIView!
-    @IBOutlet weak var progressView: UIProgressView!
     @IBOutlet weak var connectionProblemView: UIImageView!
     @IBOutlet weak var webviewView: UIView!
     var toolbarView: UIToolbar!
@@ -58,8 +57,6 @@ class ViewController: UIViewController, WKNavigationDelegate, UIDocumentInteract
         webviewView.addSubview(Fragmently.webView);
         
         Fragmently.webView.uiDelegate = self;
-        
-        Fragmently.webView.addObserver(self, forKeyPath: #keyPath(WKWebView.estimatedProgress), options: .new, context: nil)
 
         if(pullToRefresh){
             let refreshControl = UIRefreshControl()
@@ -148,18 +145,20 @@ class ViewController: UIViewController, WKNavigationDelegate, UIDocumentInteract
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!){
         htmlIsLoaded = true
         
-        self.setProgress(1.0, true)
         self.animateConnectionProblem(false)
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
-            Fragmently.webView.isHidden = false
+        Fragmently.webView.alpha = 0
+        Fragmently.webView.isHidden = false
+        UIView.animate(withDuration: 0.25, animations: {
+            Fragmently.webView.alpha = 1
+            self.loadingView.alpha = 0
+        }, completion: { _ in
             self.loadingView.isHidden = true
-           
-            self.setProgress(0.0, false)
-            
-            self.overrideUIStyle()
-            handleFCMTokenIfAuthorized()
-        }
+            self.loadingView.alpha = 1
+        })
+        
+        self.overrideUIStyle()
+        handleFCMTokenIfAuthorized()
     }
     
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
@@ -178,36 +177,14 @@ class ViewController: UIViewController, WKNavigationDelegate, UIDocumentInteract
             }
         } else {
             animateConnectionProblem(true);
-            setProgress(0.05, true);
             
             DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                self.setProgress(0.1, true);
                 DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
                     self.reloadWebview()
                 }
             }
         }
     }
-    
-    override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
-
-        if (keyPath == #keyPath(WKWebView.estimatedProgress) &&
-                Fragmently.webView.isLoading &&
-                !self.loadingView.isHidden &&
-                !self.htmlIsLoaded) {
-                    var progress = Float(Fragmently.webView.estimatedProgress);
-                    
-                    if (progress >= 0.8) { progress = 1.0; };
-                    if (progress >= 0.3) { self.animateConnectionProblem(false); }
-                    
-                    self.setProgress(progress, true);
-        }
-    }
-    
-    func setProgress(_ progress: Float, _ animated: Bool) {
-        self.progressView.setProgress(progress, animated: animated);
-    }
-    
     
     func animateConnectionProblem(_ show: Bool) {
         if (show) {
@@ -225,10 +202,6 @@ class ViewController: UIViewController, WKNavigationDelegate, UIDocumentInteract
                 self.connectionProblemView.layer.removeAllAnimations();
             })
         }
-    }
-        
-    deinit {
-        Fragmently.webView.removeObserver(self, forKeyPath: #keyPath(WKWebView.estimatedProgress))
     }
 }
 

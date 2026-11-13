@@ -35,15 +35,9 @@
                                                         <color key="tintColor" systemColor="secondarySystemFillColor"/>
                                                         <rect key="contentStretch" x="0.0" y="0.0" width="0.0" height="0.0"/>
                                                     </imageView>
-                                                    <progressView opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="750" progress="0.10000000000000001" id="xSD-dq-HF9">
-                                                        <rect key="frame" x="50" y="146" width="100" height="15"/>
-                                                        <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
-                                                        <color key="backgroundColor" systemColor="secondarySystemFillColor"/>
-                                                        <color key="tintColor" red="0" green="0" blue="0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                                    </progressView>
                                                     <imageView hidden="YES" opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" image="wifi.slash" catalog="system" translatesAutoresizingMaskIntoConstraints="NO" id="TpV-I7-c6z">
-                                                        <rect key="frame" x="85" y="159.33333333333314" width="31.999999999999886" height="30.000000000000085"/>
-                                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                        <rect key="frame" x="84" y="146" width="32" height="30"/>
+                                                        <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
                                                         <color key="tintColor" systemColor="secondaryLabelColor"/>
                                                     </imageView>
                                                 </subviews>
@@ -61,7 +55,6 @@
                     <connections>
                         <outlet property="connectionProblemView" destination="TpV-I7-c6z" id="76F-WR-UnJ"/>
                         <outlet property="loadingView" destination="DIO-mU-n27" id="Wlk-Yd-6b1"/>
-                        <outlet property="progressView" destination="xSD-dq-HF9" id="0jL-XR-Xwq"/>
                         <outlet property="webviewView" destination="PHY-vp-dMl" id="qhH-E4-3lf"/>
                     </connections>
                 </viewController>
