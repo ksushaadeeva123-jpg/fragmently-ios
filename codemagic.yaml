@@ -13,10 +13,8 @@ workflows:
           echo "Dependencies are ready"
       - name: Build unsigned IPA
         script: |
-          # Переходим в папку с проектом Xcode (проверь путь, возможно просто 'ios')
           cd ios 
           
-          # Собираем архив без подписи
           xcodebuild archive \
             -project "*.xcodeproj" \
             -scheme "ВашеИмяСхемы" \
@@ -27,7 +25,6 @@ workflows:
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO
             
-          # Упаковываем архив в IPA
           mkdir -p build/Payload
           cp -r $CM_BUILD_DIR/build/App.xcarchive/Products/Applications/*.app build/Payload/
           cd build && zip -r App-unsigned.ipa Payload
