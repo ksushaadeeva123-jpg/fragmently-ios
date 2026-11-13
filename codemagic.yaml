@@ -5,26 +5,24 @@ workflows:
     max_build_duration: 60
     environment:
       xcode: latest
+      cocoapods: default
     scripts:
-      - name: Install dependencies
+      - name: Install CocoaPods dependencies
         script: |
-          # Если в проекте PWABuilder есть Podfile, раскомментируй строку ниже
-          # cd ios && pod install
-          echo "Dependencies are ready"
+          cd src
+          pod install
       - name: Build unsigned IPA
         script: |
-          cd ios 
-          
+          cd src
           xcodebuild archive \
-            -project "*.xcodeproj" \
-            -scheme "ВашеИмяСхемы" \
+            -workspace "Fragmently.xcworkspace" \
+            -scheme "Fragmently" \
             -configuration Release \
             -sdk iphoneos \
             -archivePath $CM_BUILD_DIR/build/App.xcarchive \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO
-            
           mkdir -p build/Payload
           cp -r $CM_BUILD_DIR/build/App.xcarchive/Products/Applications/*.app build/Payload/
           cd build && zip -r App-unsigned.ipa Payload
