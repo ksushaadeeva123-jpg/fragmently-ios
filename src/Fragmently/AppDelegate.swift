@@ -11,27 +11,27 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication,
                        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
 
-// TODO: if we're using Firebase, uncomment next string
-        //FirebaseApp.configure()
+        FirebaseApp.configure()
 
         // [START set_messaging_delegate]
         Messaging.messaging().delegate = self
         // [END set_messaging_delegate]
-        // Register for remote notifications. This shows a permission dialog on first run, to
-        // show the dialog at a more appropriate time move this registration accordingly.
-        // [START register_for_notifications]
-   
         UNUserNotificationCenter.current().delegate = self
-
-      //  let authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]
-      //  UNUserNotificationCenter.current().requestAuthorization(
-      //      options: authOptions,
-      //      completionHandler: {_, _ in })
-
-// TODO: if we're using Firebase, uncomment next string
-        // application.registerForRemoteNotifications()
-
         // [END register_for_notifications]
+
+        // If notifications were already allowed, restore the APNs/FCM token on launch
+        // so the web app can re-register it without waiting for the user to tap the toggle.
+        UNUserNotificationCenter.current().getNotificationSettings { settings in
+            switch settings.authorizationStatus {
+            case .authorized, .provisional, .ephemeral:
+                DispatchQueue.main.async {
+                    application.registerForRemoteNotifications()
+                }
+            default:
+                break
+            }
+        }
+
         return true
       }
 
@@ -69,20 +69,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         completionHandler(UIBackgroundFetchResult.newData)
       }
 
+      func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        print("APNs token retrieved")
+        Messaging.messaging().apnsToken = deviceToken
+        handleFCMToken()
+      }
+
       // [END receive_message]
       func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
         print("Unable to register for remote notifications: \(error.localizedDescription)")
       }
-
-      // This function is added here only for debugging purposes, and can be removed if swizzling is enabled.
-      // If swizzling is disabled then this function must be implemented so that the APNs token can be paired to
-      // the FCM registration token.
-//      func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
-//        print("APNs token retrieved: \(deviceToken)")
-//
-//        // With swizzling disabled you must set the APNs token here.
-//        // Messaging.messaging().apnsToken = deviceToken
-//      }
     }
 
     // [START ios_10_message_handling]

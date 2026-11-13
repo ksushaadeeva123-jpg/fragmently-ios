@@ -66,17 +66,13 @@ func parseSubscribeMessage(message: WKScriptMessage) -> [SubscribeMessage] {
 
 func returnPermissionResult(isGranted: Bool){
     DispatchQueue.main.async(execute: {
-        if (isGranted){
-            Fragmently.webView.evaluateJavaScript("this.dispatchEvent(new CustomEvent('push-permission-request', { detail: 'granted' }))")
-        }
-        else {
-            Fragmently.webView.evaluateJavaScript("this.dispatchEvent(new CustomEvent('push-permission-request', { detail: 'denied' }))")
-        }
+        let detail = isGranted ? "granted" : "denied"
+        Fragmently.webView.evaluateJavaScript("window.dispatchEvent(new CustomEvent('push-permission-request', { detail: '\(detail)' }))")
     })
 }
 func returnPermissionState(state: String){
     DispatchQueue.main.async(execute: {
-        Fragmently.webView.evaluateJavaScript("this.dispatchEvent(new CustomEvent('push-permission-state', { detail: '\(state)' }))")
+        Fragmently.webView.evaluateJavaScript("window.dispatchEvent(new CustomEvent('push-permission-state', { detail: '\(state)' }))")
     })
 }
 
@@ -136,7 +132,7 @@ func handlePushState() {
 func checkViewAndEvaluate(event: String, detail: String) {
     if (!Fragmently.webView.isHidden && !Fragmently.webView.isLoading ) {
         DispatchQueue.main.async(execute: {
-            Fragmently.webView.evaluateJavaScript("this.dispatchEvent(new CustomEvent('\(event)', { detail: \(detail) }))")
+            Fragmently.webView.evaluateJavaScript("window.dispatchEvent(new CustomEvent('\(event)', { detail: \(detail) }))")
         })
     }
     else {
@@ -146,18 +142,35 @@ func checkViewAndEvaluate(event: String, detail: String) {
     }
 }
 
-func handleFCMToken(){
+func handleFCMToken(attempt: Int = 0){
     DispatchQueue.main.async(execute: {
         Messaging.messaging().token { token, error in
-            if let error = error {
-                print("Error fetching FCM registration token: \(error)")
-                checkViewAndEvaluate(event: "push-token", detail: "ERROR GET TOKEN")
-            } else if let token = token {
-                print("FCM registration token: \(token)")
+            if let token = token, !token.isEmpty {
+                print("FCM registration token received")
                 checkViewAndEvaluate(event: "push-token", detail: "'\(token)'")
+                return
             }
-        }   
+            if attempt < 8 {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                    handleFCMToken(attempt: attempt + 1)
+                }
+                return
+            }
+            print("Error fetching FCM registration token: \(String(describing: error))")
+            checkViewAndEvaluate(event: "push-token", detail: "ERROR GET TOKEN")
+        }
     })
+}
+
+func handleFCMTokenIfAuthorized(){
+    UNUserNotificationCenter.current().getNotificationSettings { settings in
+        switch settings.authorizationStatus {
+        case .authorized, .provisional, .ephemeral:
+            handleFCMToken()
+        default:
+            break
+        }
+    }
 }
 
 func sendPushToWebView(userInfo: [AnyHashable: Any]){

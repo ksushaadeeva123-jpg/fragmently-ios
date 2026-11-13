@@ -1,8 +1,6 @@
 import UIKit
 import WebKit
 
-var webView: WKWebView! = nil
-
 class ViewController: UIViewController, WKNavigationDelegate, UIDocumentInteractionControllerDelegate {
     enum LoadingMode {
         case defaultCachePolicy
@@ -160,6 +158,7 @@ class ViewController: UIViewController, WKNavigationDelegate, UIDocumentInteract
             self.setProgress(0.0, false)
             
             self.overrideUIStyle()
+            handleFCMTokenIfAuthorized()
         }
     }
     

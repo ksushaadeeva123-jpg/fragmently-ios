@@ -1,5 +1,9 @@
 import WebKit
 
+struct Fragmently {
+    static var webView: WKWebView!
+}
+
 struct Cookie {
     var name: String
     var value: String
