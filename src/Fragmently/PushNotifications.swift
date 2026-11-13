@@ -104,6 +104,9 @@ func handlePushPermission() {
                 returnPermissionResult(isGranted: false)
             case .authorized, .ephemeral, .provisional:
                 returnPermissionResult(isGranted: true)
+                DispatchQueue.main.async {
+                    UIApplication.shared.registerForRemoteNotifications()
+                }
             @unknown default:
                 return;
             }
